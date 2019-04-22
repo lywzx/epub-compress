@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
@@ -17,9 +17,19 @@
   },
   "homepage": "https://github.com/lywzx/epub-compress#readme",
   "dependencies": {
+    "archiver": "^3.0.0",
+    "async.maplimit": "^0.5.2",
+    "css-minifiers": "^3.0.0",
+    "html-minifier": "^4.0.0",
+    "imagemin": "^6.1.0",
     "install": "^0.12.2",
+    "mime-types": "^2.1.24",
     "node-stream-zip": "^1.8.0",
     "npm": "^6.9.0",
-    "tinypng-fs": "0.0.1"
+    "tinypng-fs": "0.0.1",
+    "yargs": "^13.2.2"
+  },
+  "devDependencies": {
+    "mocha": "^6.1.4"
   }
 }
