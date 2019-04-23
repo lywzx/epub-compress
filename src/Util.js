@@ -39,7 +39,7 @@ function getFiles(dirname) {
                         for (let i = 0, j = result.length; i < j; i++) {
                             let current = result[i];
                             if (current) {
-                                if (Object.prototype.toString.call(current) === '[object Array]') {
+                                if (isArray(current)) {
                                     ret = ret.concat(flatten(current));
                                 } else {
                                     ret.push(current);
@@ -74,6 +74,23 @@ function arrayDiff(base, ...arg) {
     return ret;
 }
 
+function is(type) {
+    let toString = Object.prototype.toString;
+    return function(arg) {
+        return toString.call(arg) === type;
+    }
+}
+const isArray = is('[object Array]');
+const isString = is('[object String]');
+const isFunction = is('[object Function]');
+const isRegExp = is('[object RegExp]');
+const isObject = is('[object Object]');
+
 exports.mkdirs = mkdirs;
 exports.getFiles = getFiles;
 exports.arrayDiff = arrayDiff;
+exports.isArray   = isArray;
+exports.isString  = isString;
+exports.isFunction = isFunction;
+exports.isRegExp  = isRegExp;
+exports.isObject = isObject;

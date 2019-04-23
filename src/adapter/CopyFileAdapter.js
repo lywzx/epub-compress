@@ -13,11 +13,19 @@ function copyFile(src, dest) {
     })
 }
 
-function CopyFileAdapter(from, to) {
-    return new Promise((resolve) => {
+function CopyFileAdapter(file) {
+    let [from, to] = file;
+    return new Promise((resolve, reject) => {
+        console.log(`开始复制文件：${from}`);
         Util.mkdirs(path.parse(to).dir, () => {
-            return resolve(copyFile(from, to));
-        });
+            return resolve(copyFile(from, to).then((it)=>{
+                console.log(`${from}：文件复制成功`);
+                return it;
+            }).catch(() => {
+                consoe.log(`${from}: 处理复制失败`);
+                return Promise.reject(file);
+            }));
+        })
     });
 }
 
