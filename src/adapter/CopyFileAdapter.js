@@ -1,15 +1,16 @@
 const fs = require('fs');
 const path = require('path');
-const Util = require('../Util')
+const Util = require('../Util');
 
 function copyFile(src, dest) {
     return new Promise(function(resolve, reject){
-        let readStream = fs.createReadStream(src);
-        readStream.once('error', reject);
-        readStream.once('end', ()=>{
-            resolve(src);
+        Util.copyFile(src, dest, function(err, result) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(src);
+            }
         });
-        readStream.pipe(fs.createWriteStream(dest));
     })
 }
 
@@ -20,7 +21,7 @@ function CopyFileAdapter(file) {
         Util.mkdirs(path.parse(to).dir, () => {
             return resolve(copyFile(from, to).then((it)=>{
                 console.log(`${from}：文件复制成功`);
-                return it;
+                return file;
             }).catch(() => {
                 consoe.log(`${from}: 处理复制失败`);
                 return Promise.reject(file);

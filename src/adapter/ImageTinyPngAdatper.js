@@ -8,18 +8,18 @@ function ImageAdapter(images, success) {
         let resolved = [];
         let rejected  = [];
         mapLimit(images, 4, (it, callback) => {
-            console.log(`开始处理：${it[0]}`);
+            console.log(`${it[0]}：TinyPng开始处理`);
             tinypng.minifiyFile(it[0], it[1]).then((result)=>{
                 if (Util.isFunction(success)) {
                     success(it[0]);
                 }
-                resolved.push(it[0]);
+                resolved.push(it);
                 callback(null, it[0]);
-                console.log(`${it[0]}：处理成功`);
+                console.log(`${it[0]}：TinyPng处理成功`);
             }).catch(function(err) {
                 callback(null);
                 rejected.push(it);
-                console.log(`${it[0]}：处理失败`);
+                console.log(`${it[0]}：TinyPng处理失败`);
             });
         }, function(err, result) {
             if (rejected && rejected.length) {

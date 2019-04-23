@@ -56,6 +56,47 @@ function getFiles(dirname) {
     })
 }
 
+function moveFile(src, dest, callback) {
+    let stat = fs.statSync(src);
+    if (!stat.isFile()) {
+        debugger
+    }
+    fs.rename(src, dest, function(err) {
+        console.log(src, dest, err);
+        if (err) {
+            if (err.code === 'EXDEV') {
+                copyFile(src, dest, function(err, result) {
+                    if (err) {
+                        callback(err);
+                        return ;
+                    }
+                    fs.unlink(src, function(err) {
+                        if (err) {
+                            callback(err);
+                            return ;
+                        }
+                        callback(null, dest);
+                    })
+                })
+            } else {
+                callback(err);
+            }
+            return ;
+        }
+        callback(null, dest);
+    })
+}
+
+function copyFile(src, dest, callback) {
+    let readStream = fs.createReadStream(src);
+    readStream.once('error', (err) => {
+        isFunction(callback) && callback(err, null);
+    });
+    readStream.once('end', ()=>{
+        isFunction(callback) && callback(null, dest);
+    });
+    readStream.pipe(fs.createWriteStream(dest));
+}
 
 function arrayDiff(base, ...arg) {
     let ret = [];
@@ -89,6 +130,8 @@ const isObject = is('[object Object]');
 exports.mkdirs = mkdirs;
 exports.getFiles = getFiles;
 exports.arrayDiff = arrayDiff;
+exports.moveFile  = moveFile;
+exports.copyFile  = copyFile;
 exports.isArray   = isArray;
 exports.isString  = isString;
 exports.isFunction = isFunction;

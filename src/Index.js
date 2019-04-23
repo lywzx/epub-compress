@@ -24,7 +24,10 @@ const cpr = new EpubCompress(argv.f, argv.o);
 cpr.init().then(()=>{
     return cpr.compress();
 });
-
+process.on('unhandledRejection', error => {
+    // Will print "unhandledRejection err is not defined"
+    console.log('unhandledRejection', error.message);
+});
 
 
 

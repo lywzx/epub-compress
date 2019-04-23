@@ -3,8 +3,9 @@ const fs   = require('fs');
 const path = require('path');
 const Zip  = require('./Zip');
 const mime = require('mime-types');
-const ImageAdapter = require('./adapter/ImageAdatper');
+const ImageTinyPngAdapter = require('./adapter/ImageTinyPngAdatper');
 const CopyFileAdapter = require('./adapter/CopyFileAdapter');
+const ImageAdapter  = require('./adapter/ImageAdapter');
 
 class EpubCompress {
 
@@ -12,6 +13,7 @@ class EpubCompress {
      *
      * @param file
      * @param tempDir
+     * @param to
      */
     constructor(file, to,  tempDir = './temp') {
         let fileParse = path.parse(file);
@@ -141,23 +143,23 @@ class EpubCompress {
 
             }
 
-            let promise = [];
+            let prom = [];
 
             for (let i in adpRun) {
                 let current = adpRun[i];
                 let adapter = adapters[i] || EpubCompress.adapter[i];
                 if ( !('single' in adapter) || adapter.single === true ) {
-                    promise.push.call(promise, current.map((it) => {
+                    prom.push.apply(prom, current.map((it) => {
                         return this.resolveTaskWithRetry(adapter.adapter, it, resolveCallback, retry);
                         //return Promise.resolve(adapter.adapter(it[0], it[1])).then(resolveCallback);
                     }));
                 } else {
-                    promise.push(this.resolveTaskWithRetry(adapter.adapter, adpRun[i], resolveCallback, retry));
+                    prom.push(this.resolveTaskWithRetry(adapter.adapter, current, resolveCallback, retry));
                     //promise.push(Promise.resolve(adapter.adapter(adpRun[i], resolveCallback)))
                 }
             }
 
-            return Promise.all(promise);
+            return Promise.all(prom);
         }).then((result)=> {
             /*if (result) {
                 let resolved = [];
@@ -177,6 +179,8 @@ class EpubCompress {
 
             }*/
             return result;
+        }).catch(()=>{
+            debugger
         });
     }
 
@@ -194,25 +198,38 @@ class EpubCompress {
     }
 
     resolveTaskWithRetry(adapter, data, resolveFn, retry ) {
-        let resolve = Promise.resolve(adapter(data, resolveFn));
-        resolve.catch((file) => {
+        let resolve = null;
+        if (Util.isString(data[0])) {
+            resolve = Promise.resolve(adapter(data)).then((item)=>{
+                resolveFn(item);
+                return item;
+            });
+        } else {
+            resolve = Promise.resolve(adapter(data, resolveFn));
+        }
+        return resolve.catch((file) => {
             if ( retry > 0) {
-                debugger
                 return this.resolveTaskWithRetry(adapter, file, resolveFn, --retry);
             }
-            debugger
             return Promise.reject(file);
-        })
+        });
     }
 }
 
 EpubCompress.adapter = {
-    list: [{
-        // 注册为批量处理
-        rule: /^image\/[a-z]+$/,
-        adapter: ImageAdapter,
-        single: false
-    }],
+    list: [
+        {
+            rule: /^image\/(?:jpg|jpeg|png)$/,
+            maxSize: 5242880,
+            adapter: ImageTinyPngAdapter,
+            single: false
+        },
+        {
+            // 注册为批量处理
+            rule: /^image\/(?:jpg|jpeg|png|gif|svg)$/,
+            adapter: ImageAdapter
+        }
+    ],
     default: {
         adapter: CopyFileAdapter
     }
