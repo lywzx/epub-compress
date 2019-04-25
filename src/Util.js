@@ -57,12 +57,7 @@ function getFiles(dirname) {
 }
 
 function moveFile(src, dest, callback) {
-    let stat = fs.statSync(src);
-    if (!stat.isFile()) {
-        debugger
-    }
     fs.rename(src, dest, function(err) {
-        console.log(src, dest, err);
         if (err) {
             if (err.code === 'EXDEV') {
                 copyFile(src, dest, function(err, result) {

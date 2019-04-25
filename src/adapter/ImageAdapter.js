@@ -21,15 +21,17 @@ function ImageCompress(image) {
                     let {
                         path_out_new
                     } = statistic;
-
-                    Util.moveFile(path_out_new, to, function(err, result) {
-                        if (!err) {
-                            console.log(`${from}: 压缩成功`);
-                            resolve(image);
-                        } else {
-                            console.log(`${from}: 压缩失败`);
-                            reject(image);
-                        }
+                    let toParsed = path.parse(to);
+                    Util.mkdirs(toParsed.dir, () => {
+                        Util.moveFile(path_out_new, to, function(err, result) {
+                            if (!err) {
+                                console.log(`${from}: 压缩成功`);
+                                resolve(image);
+                            } else {
+                                console.log(`${from}: 压缩失败`);
+                                reject(image);
+                            }
+                        });
                     });
                 } else {
                     console.log(`${from}: 压缩失败`);
